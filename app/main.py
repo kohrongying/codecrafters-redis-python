@@ -1,19 +1,42 @@
 import socket
 import threading
+from typing import List, Optional
 
-def decode_bytes_string(byte_string):
-    pass
+
+class ByteStringParser:
+    COMMAND_IDENTIFIER_INDEX = 2
+
+    def __init__(self, byte_str) -> None:
+        self.byte_str = byte_str
+        self.decoded_str_list = []
+        self.decoded_str_list_simple = []
+        self.decode()
+
+    def decode(self) -> List[str]:
+        self.decoded_str_list = self.byte_str.decode().strip('\r\n').split("\r\n")
+        # print(self.byte_str, self.decoded_str_list)
+        return self.decoded_str_list
+
+    def get_command(self) -> Optional[str]:
+        try:
+            return self.decoded_str_list[self.COMMAND_IDENTIFIER_INDEX]
+        except IndexError:
+            return None
+
+    def get_args(self) -> List[Optional[str]]:
+        try:
+            num_args = int(self.decoded_str_list[0][1]) - 1
+            return [self.decoded_str_list[4 + index * 2] for index in range(num_args)]
+        except IndexError:
+            return []
+
 
 def handle_connection(conn):
     while True:
         try:
             command_in_bytes = conn.recv(1024)  # data received from client
-
-            command_string_list = command_in_bytes.decode().split("\r\n")
-            print(command_in_bytes, command_string_list)
-
-            command_text = command_string_list[2]
-            command_length = command_string_list[0][0]
+            parser = ByteStringParser(command_in_bytes)
+            command_text = parser.get_command()
 
             if command_text.upper() == "ECHO":
                 return_message = f"+{command_string_list[4]}\r\n"
@@ -21,7 +44,7 @@ def handle_connection(conn):
             else:
                 conn.send(b"+PONG\r\n")  # hardcode pong with RESP
         except ConnectionError:
-            break # terminate while loop if client disconnects
+            break  # terminate while loop if client disconnects
 
 
 def main():
