@@ -18,6 +18,8 @@ def main():
         x = threading.Thread(target=ping_function, args=(client_connection,))
         x.start()
 
+        x.join()
+
 
 if __name__ == "__main__":
     main()
