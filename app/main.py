@@ -5,8 +5,12 @@ import threading
 def handle_connection(conn):
     while True:
         try:
-            conn.recv(1024)  # data received from client
-            conn.send(b"+PONG\r\n")  # hardcode pong with RESP
+            command = conn.recv(1024)  # data received from client
+            print(command)
+            if command == "*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n":
+                conn.send(b"+hey\r\n")
+            else:
+                conn.send(b"+PONG\r\n")  # hardcode pong with RESP
         except ConnectionError:
             break # terminate while loop if client disconnects
 

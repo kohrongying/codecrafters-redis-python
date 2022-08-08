@@ -57,3 +57,19 @@ You can fix this by installing Python 3.8 locally and using that.
 
 If you'd like to use a different version of Python, change the `language_pack`
 value in `codecrafters.yml`.
+
+# Notes
+
+## RESP
+In RESP, the first byte determines the data type:
+
+For Simple Strings, the first byte of the reply is "+"
+For Errors, the first byte of the reply is "-"
+For Integers, the first byte of the reply is ":"
+For Bulk Strings, the first byte of the reply is "$"
+For Arrays, the first byte of the reply is "*"
+
+`"*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n"`
+- `*2` means RESP Array of 2 elements
+- `$` means Bulk String (binary safe string), `$4` Bulk String of 4 bytes
+
