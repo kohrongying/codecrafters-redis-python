@@ -58,7 +58,7 @@ def handle_connection(conn):
             parser = ByteStringParser(command_in_bytes)
             command_text = parser.get_command()
 
-            if command_text.upper() == "ECHO":
+            if command_text and command_text.upper() == "ECHO":
                 args: List[Optional[str]] = parser.get_args()
                 return_message = RESPResponseBuilder().encode_arrays(args)
                 conn.send(return_message)
