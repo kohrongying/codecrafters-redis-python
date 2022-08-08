@@ -19,7 +19,7 @@ class RedisStore:
         self.store[key] = value
         self.expiry[key] = None
         if len(args) > 0:
-            if args[0] == "PX":
+            if args[0].upper() == "PX":
                 self.expiry[key] = int(time.time() + int(args[1]) * 0.001)
         return return_message
 
