@@ -32,16 +32,14 @@ def handle_connection(conn):
 
 
 def handle_set(args, conn):
-    if len(args) != 2:
-        message = RESPResponseBuilder().encode_error("only accept 2 arguments")
+    key = args[0]
+    value = args[1]
+    other_args = args[2:] if len(args) > 2 else []
+    response = redis_store.set(key, value, other_args)
+    if response == "OK":
+        message = RESPResponseBuilder().encode_simple_string("OK")
     else:
-        key = args[0]
-        value = args[1]
-        response = redis_store.set(key, value)
-        if response == "OK":
-            message = RESPResponseBuilder().encode_simple_string("OK")
-        else:
-            message = RESPResponseBuilder().encode_bulk_strings(response)
+        message = RESPResponseBuilder().encode_bulk_strings(response)
     conn.send(message)
 
 
