@@ -24,7 +24,8 @@ def handle_connection(conn):
                 if len(args) != 1:
                     raise Exception("Can only GET one argument")
                 try:
-                    stored_value = redis_store[args]
+                    key = args[0]
+                    stored_value = redis_store[key]
                     if type(stored_value) == str:
                         message = RESPResponseBuilder().encode_bulk_strings(stored_value)
                     else:
