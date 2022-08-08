@@ -2,60 +2,67 @@ import socket
 import threading
 from typing import List, Optional
 
-from app.byte_string_parser import ByteStringParser
+from app.redis_store import RedisStore
+from app.resp_decoder import RESPDecoder
 from app.resp_response_builder import RESPResponseBuilder
 
-redis_store = {}
+redis_store = RedisStore()
 
 
 def handle_connection(conn):
     while True:
         try:
             command_in_bytes = conn.recv(1024)  # data received from client
-            parser = ByteStringParser(command_in_bytes)
+            parser = RESPDecoder(command_in_bytes)
             command_text = parser.get_command()
             args: List[Optional[str]] = parser.get_args()
             print('args', args)
 
             if command_text and command_text.upper() == "ECHO":
-                return_message = RESPResponseBuilder().encode_arrays(args)
-                conn.send(return_message)
+                handle_echo(args, conn)
             elif command_text and command_text.upper() == "GET":
-                if len(args) != 1:
-                    raise Exception("Can only GET one argument")
-                try:
-                    key = args[0]
-                    stored_value = redis_store[key]
-                    if type(stored_value) == str:
-                        message = RESPResponseBuilder().encode_bulk_strings(stored_value)
-                    else:
-                        message = RESPResponseBuilder().encode_error("value is not string")
-                    conn.send(message)
-                except KeyError:
-                    message = RESPResponseBuilder().encode_bulk_strings("(nil)")
-                    conn.send(message)
+                handle_get(args, conn)
             elif command_text and command_text.upper() == "SET":
-                if len(args) != 2:
-                    raise Exception("Can only SET key value")
-                try:
-                    key = args[0]
-                    value = args[1]
-                    if key in redis_store:
-                        old_value = redis_store[key]
-                        redis_store[key] = value
-                        message = RESPResponseBuilder().encode_bulk_strings(old_value)
-                    else:
-                        redis_store[key] = value
-                        message = RESPResponseBuilder().encode_simple_string("OK")
-                    conn.send(message)
-                except:
-                    message = RESPResponseBuilder().encode_bulk_strings("help")
-                    conn.send(message)
-
+                handle_set(args, conn)
             else:
-                conn.send(b"+PONG\r\n")  # hardcode pong with RESP
+                message = RESPResponseBuilder().encode_simple_string("PONG")
+                conn.send(message)  # hardcode pong with RESP
         except ConnectionError:
             break  # terminate while loop if client disconnects
+
+
+def handle_set(args, conn):
+    if len(args) != 2:
+        message = RESPResponseBuilder().encode_error("only accept 2 arguments")
+    else:
+        key = args[0]
+        value = args[1]
+        response = redis_store.set(key, value)
+        if response == "OK":
+            message = RESPResponseBuilder().encode_simple_string("OK")
+        else:
+            message = RESPResponseBuilder().encode_bulk_strings(response)
+    conn.send(message)
+
+
+def handle_get(args, conn):
+    if len(args) != 1:
+        message = RESPResponseBuilder().encode_error("only accept 1 argument")
+    else:
+        key = args[0]
+        stored_value = redis_store.get(key)
+        if stored_value is None:
+            message = RESPResponseBuilder().encode_bulk_strings("(nil)")
+        elif type(stored_value) == str:
+            message = RESPResponseBuilder().encode_bulk_strings(stored_value)
+        else:
+            message = RESPResponseBuilder().encode_error("value is not string")
+    conn.send(message)
+
+
+def handle_echo(args, conn):
+    return_message = RESPResponseBuilder().encode_arrays(args)
+    conn.send(return_message)
 
 
 def main():

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 
-class ByteStringParser:
+class RESPDecoder:
     COMMAND_IDENTIFIER_INDEX = 2
 
     def __init__(self, byte_str) -> None:
