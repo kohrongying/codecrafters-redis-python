@@ -48,10 +48,8 @@ def handle_get(args, conn):
         message = RESPResponseBuilder().encode_error("only accept 1 argument")
     else:
         key = args[0]
-        stored_value = redis_store.get(key)
-        if stored_value is None:
-            message = RESPResponseBuilder().encode_bulk_strings("(nil)")
-        elif type(stored_value) == str:
+        stored_value: Optional[str] = redis_store.get(key)
+        if type(stored_value) == str or stored_value is None:
             message = RESPResponseBuilder().encode_bulk_strings(stored_value)
         else:
             message = RESPResponseBuilder().encode_error("value is not string")

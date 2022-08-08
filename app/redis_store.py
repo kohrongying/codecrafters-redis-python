@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 
 class RedisStore:
@@ -6,7 +7,7 @@ class RedisStore:
         self.store = {}
         self.expiry = {}
 
-    def get(self, key: str):
+    def get(self, key: str) -> Optional[str]:
         if self.expiry.get(key, None) is not None and self._is_expired(key):
             return None
         return self.store.get(key, None)

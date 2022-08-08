@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 
 class RESPResponseBuilder:
@@ -9,7 +9,9 @@ class RESPResponseBuilder:
         return return_message.encode()
 
     @staticmethod
-    def encode_bulk_strings(message: str) -> bytes:
+    def encode_bulk_strings(message: Optional[str]) -> bytes:
+        if message is None:
+            return b"$-1\r\n"
         return_message = f"${len(message)}\r\n{message}\r\n"
         return return_message.encode()
 

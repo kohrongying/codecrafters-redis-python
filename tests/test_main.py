@@ -61,6 +61,7 @@ class TestRESPResponseBuilder(unittest.TestCase):
 
     def test_type(self):
         self.assertEqual(type("message"), str)
+        self.assertEqual(type(""), str)
         self.assertEqual(type(["message"]), list)
 
 
