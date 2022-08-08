@@ -25,3 +25,8 @@ class RESPResponseBuilder:
         for message in messages:
             return_message += f"${len(message)}\r\n{message}\r\n"
         return return_message.encode()
+
+    @staticmethod
+    def encode_error(message="something unexpected happened") -> bytes:
+        return_message = f"-Error {message}\r\n"
+        return return_message.encode()

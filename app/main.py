@@ -15,6 +15,7 @@ def handle_connection(conn):
             parser = ByteStringParser(command_in_bytes)
             command_text = parser.get_command()
             args: List[Optional[str]] = parser.get_args()
+            print('args', args)
 
             if command_text and command_text.upper() == "ECHO":
                 return_message = RESPResponseBuilder().encode_arrays(args)
@@ -24,7 +25,10 @@ def handle_connection(conn):
                     raise Exception("Can only GET one argument")
                 try:
                     stored_value = redis_store[args]
-                    message = RESPResponseBuilder().encode_bulk_strings(stored_value)
+                    if type(stored_value) == str:
+                        message = RESPResponseBuilder().encode_bulk_strings(stored_value)
+                    else:
+                        message = RESPResponseBuilder().encode_error("value is not string")
                     conn.send(message)
                 except KeyError:
                     message = RESPResponseBuilder().encode_bulk_strings("(nil)")
@@ -35,8 +39,13 @@ def handle_connection(conn):
                 try:
                     key = args[0]
                     value = args[1]
-                    redis_store[key] = value
-                    message = RESPResponseBuilder().encode_bulk_strings("OK")
+                    if key in redis_store:
+                        old_value = redis_store[key]
+                        redis_store[key] = value
+                        message = RESPResponseBuilder().encode_bulk_strings(old_value)
+                    else:
+                        redis_store[key] = value
+                        message = RESPResponseBuilder().encode_simple_string("OK")
                     conn.send(message)
                 except:
                     message = RESPResponseBuilder().encode_bulk_strings("help")

@@ -55,6 +55,13 @@ class TestRESPResponseBuilder(unittest.TestCase):
         self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
                          b"+hello\r\n")
 
+    def test_encode_error(self):
+        self.assertEqual(RESPResponseBuilder().encode_error(),
+                         b"-Error something unexpected happened\r\n")
+
+    def test_type(self):
+        self.assertEqual(type("message"), str)
+        self.assertEqual(type(["message"]), list)
 
 if __name__ == "__main__":
     print('hi')
