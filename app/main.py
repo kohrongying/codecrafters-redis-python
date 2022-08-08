@@ -45,16 +45,13 @@ def handle_set(args, conn):
 
 
 def handle_get(args, conn):
-    if len(args) != 1:
-        message = RESPResponseBuilder().encode_error("only accept 1 argument")
+    key = args[0]
+    stored_value: Optional[str] = redis_store.get(key)
+    print('stored value is', stored_value)
+    if type(stored_value) == str or stored_value is None:
+        message = RESPResponseBuilder().encode_bulk_strings(stored_value)
     else:
-        key = args[0]
-        print('getting', key)
-        stored_value: Optional[str] = redis_store.get(key)
-        if type(stored_value) == str or stored_value is None:
-            message = RESPResponseBuilder().encode_bulk_strings(stored_value)
-        else:
-            message = RESPResponseBuilder().encode_error("value is not string")
+        message = RESPResponseBuilder().encode_error("value is not string")
     conn.send(message)
 
 
