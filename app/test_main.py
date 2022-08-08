@@ -42,7 +42,8 @@ class TestRESPResponseBuilder(unittest.TestCase):
     def test_encode_bulk_string_single_arg(self):
         messages = ["hello"]
         self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
-                         b"*1\r\n$5\r\nhello\r\n")
+                         b"+hello\r\n")
+
 
 if __name__ == "__main__":
     print('hi')

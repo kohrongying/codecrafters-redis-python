@@ -40,6 +40,10 @@ class RESPResponseBuilder:
     @staticmethod
     def encode_arrays(messages: List[str]) -> bytes:
         return_message = ""
+        if len(messages) == 1:
+            print('entered')
+            return RESPResponseBuilder.encode_simple_string(messages[0])
+
         length_identifier = f"*{len(messages)}"
         return_message += length_identifier + '\r\n'
         for message in messages:
