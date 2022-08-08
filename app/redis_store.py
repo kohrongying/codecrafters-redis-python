@@ -10,6 +10,8 @@ class RedisStore:
     def get(self, key: str) -> Optional[str]:
         if self.expiry.get(key, None) is not None and self._is_expired(key):
             return None
+        print('expiry set', self.expiry.get(key))
+        print('now is', time.time())
         return self.store.get(key, None)
 
     def set(self, key: str, value: any, *args) -> str:
