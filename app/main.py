@@ -48,6 +48,7 @@ def handle_get(args, conn):
         message = RESPResponseBuilder().encode_error("only accept 1 argument")
     else:
         key = args[0]
+        print('getting', key)
         stored_value: Optional[str] = redis_store.get(key)
         if type(stored_value) == str or stored_value is None:
             message = RESPResponseBuilder().encode_bulk_strings(stored_value)
