@@ -34,12 +34,13 @@ def handle_connection(conn):
 def handle_set(args, conn):
     key = args[0]
     value = args[1]
-    other_args = args[2:] if len(args) > 2 else []
-    response = redis_store.set(key, value, other_args)
-    if response == "OK":
-        message = RESPResponseBuilder().encode_simple_string("OK")
+    if len(args) > 2 and args[2].upper() == "PX":
+        expiry = int(args[3])
+        response = redis_store.set_with_expiry(key, value, expiry)
     else:
-        message = RESPResponseBuilder().encode_bulk_strings(response)
+        response = redis_store.set(key, value)
+
+    message = RESPResponseBuilder().encode_bulk_strings(response)
     conn.send(message)
 
 

@@ -15,15 +15,14 @@ class RedisStore:
             return None
         return self.store.get(key, None)
 
-    def set(self, key: str, value: any, *args) -> str:
+    def set(self, key: str, value: any) -> str:
         return_message = "OK" if key not in self.store else self.store.get(key)
         self.store[key] = value
-        self.expiry[key] = None
-        opts: List = args[0]
-        if len(opts) > 0:
-            if opts[0].upper() == "PX":
-                self.expiry[key] = int(time.time() + int(opts[1]) * 0.001)
         return return_message
+
+    def set_with_expiry(self, key, value, expiry_in_sec: int) -> str:
+        self.expiry[key] = int(time.time() + expiry_in_sec * 0.001)
+        return self.set(key, value)
 
     def _is_expired(self, key) -> bool:
         return self.expiry.get(key) < time.time()
