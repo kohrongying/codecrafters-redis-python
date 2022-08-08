@@ -2,9 +2,13 @@ import socket
 import threading
 
 
-def ping_function(conn):
-    conn.recv(1024)  # data received from client
-    conn.send(b"+PONG\r\n")  # hardcode pong with RESP
+def handle_connection(conn):
+    while True:
+        try:
+            conn.recv(1024)  # data received from client
+            conn.send(b"+PONG\r\n")  # hardcode pong with RESP
+        except ConnectionError:
+            break # terminate while loop if client disconnects
 
 
 def main():
@@ -12,13 +16,13 @@ def main():
     print("Logs from your program will appear here!")
 
     server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    client_connection, _ = server_socket.accept()  # wait for client
 
     while True:
-        x = threading.Thread(target=ping_function, args=(client_connection,))
-        x.start()
+        client_connection, _ = server_socket.accept()  # wait for client
 
-        x.join()
+        # handle concurrent clients in parallel,
+        # and not block main thread by sequentially handling one connection at a time
+        threading.Thread(target=handle_connection, args=(client_connection,)).start()
 
 
 if __name__ == "__main__":
