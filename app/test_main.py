@@ -1,6 +1,7 @@
 import unittest
 
-from app.main import ByteStringParser, RESPResponseBuilder
+from app.resp_response_builder import RESPResponseBuilder
+from app.byte_string_parser import ByteStringParser
 
 
 class TestByteStringParser(unittest.TestCase):

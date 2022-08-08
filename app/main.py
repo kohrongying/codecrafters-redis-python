@@ -2,53 +2,8 @@ import socket
 import threading
 from typing import List, Optional
 
-
-class ByteStringParser:
-    COMMAND_IDENTIFIER_INDEX = 2
-
-    def __init__(self, byte_str) -> None:
-        self.byte_str = byte_str
-        self.decoded_str_list = []
-        self.decoded_str_list_simple = []
-        self.decode()
-
-    def decode(self) -> List[str]:
-        self.decoded_str_list = self.byte_str.decode().strip('\r\n').split("\r\n")
-        # print(self.byte_str, self.decoded_str_list)
-        return self.decoded_str_list
-
-    def get_command(self) -> Optional[str]:
-        try:
-            return self.decoded_str_list[self.COMMAND_IDENTIFIER_INDEX]
-        except IndexError:
-            return None
-
-    def get_args(self) -> List[Optional[str]]:
-        try:
-            num_args = int(self.decoded_str_list[0][1]) - 1
-            return [self.decoded_str_list[4 + index * 2] for index in range(num_args)]
-        except IndexError:
-            return []
-
-
-class RESPResponseBuilder:
-    @staticmethod
-    def encode_simple_string(message: str) -> bytes:
-        return_message = f"+{message}\r\n"
-        return return_message.encode()
-
-    @staticmethod
-    def encode_arrays(messages: List[str]) -> bytes:
-        return_message = ""
-        if len(messages) == 1:
-            print('entered')
-            return RESPResponseBuilder.encode_simple_string(messages[0])
-
-        length_identifier = f"*{len(messages)}"
-        return_message += length_identifier + '\r\n'
-        for message in messages:
-            return_message += f"${len(message)}\r\n{message}\r\n"
-        return return_message.encode()
+from app.byte_string_parser import ByteStringParser
+from app.resp_response_builder import RESPResponseBuilder
 
 
 def handle_connection(conn):
