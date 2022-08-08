@@ -14,13 +14,14 @@ class RedisStore:
         print('now is', time.time())
         return self.store.get(key, None)
 
-    def set(self, key: str, value: any, *args) -> str:
+    def set(self, key: str, value: any, *oargs) -> str:
         return_message = "OK" if key not in self.store else self.store.get(key)
         self.store[key] = value
         self.expiry[key] = None
-        if len(args) > 0:
-            if args[0].upper() == "PX":
-                self.expiry[key] = int(time.time() + int(args[1]) * 0.001)
+        print('set args', oargs)
+        if len(oargs) > 0:
+            if oargs[0].upper() == "PX":
+                self.expiry[key] = int(time.time() + int(oargs[1]) * 0.001)
         return return_message
 
     def _is_expired(self, key) -> bool:
