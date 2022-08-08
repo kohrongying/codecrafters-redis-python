@@ -1,3 +1,4 @@
+import math
 import time
 from typing import Optional, List
 
@@ -25,4 +26,4 @@ class RedisStore:
         return self.set(key, value)
 
     def _is_expired(self, key) -> bool:
-        return self.expiry.get(key) < time.time()
+        return self.expiry.get(key) <= math.floor(time.time())
