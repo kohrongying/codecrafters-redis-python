@@ -2,9 +2,15 @@ from typing import List
 
 
 class RESPResponseBuilder:
+
     @staticmethod
     def encode_simple_string(message: str) -> bytes:
         return_message = f"+{message}\r\n"
+        return return_message.encode()
+
+    @staticmethod
+    def encode_bulk_strings(message: str) -> bytes:
+        return_message = f"${len(message)}\r\n{message}\r\n"
         return return_message.encode()
 
     @staticmethod

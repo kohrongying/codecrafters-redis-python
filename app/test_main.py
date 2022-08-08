@@ -35,12 +35,22 @@ class TestRESPResponseBuilder(unittest.TestCase):
         echo_text = "hello"
         self.assertEqual(RESPResponseBuilder().encode_simple_string(echo_text), b"+hello\r\n")
 
-    def test_encode_bulk_string(self):
+    def test_encode_bulk_string_nonempty_string(self):
+        message = "hello"
+        self.assertEqual(RESPResponseBuilder().encode_bulk_strings(message),
+                         b"$5\r\nhello\r\n")
+
+    def test_encode_bulk_string_empty_string(self):
+        message = ""
+        self.assertEqual(RESPResponseBuilder().encode_bulk_strings(message),
+                         b"$0\r\n\r\n")
+
+    def test_encode_array(self):
         messages = ["hello", "world"]
         self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
                          b"*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n")
 
-    def test_encode_bulk_string_single_arg(self):
+    def test_encode_array_single_arg(self):
         messages = ["hello"]
         self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
                          b"+hello\r\n")
