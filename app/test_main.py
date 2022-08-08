@@ -1,5 +1,6 @@
 import unittest
-from app.main import ByteStringParser
+
+from app.main import ByteStringParser, RESPResponseBuilder
 
 
 class TestByteStringParser(unittest.TestCase):
@@ -27,11 +28,21 @@ class TestByteStringParser(unittest.TestCase):
         actual = p.get_args()
         self.assertEqual(actual, ['hey', 'world'])
 
-    def test_format_bstring(self):
-        echo_text = "hello"
-        bstr = f"+{echo_text}\r\n"
-        self.assertEqual(bstr.encode(), b"+hello\r\n")
 
+class TestRESPResponseBuilder(unittest.TestCase):
+    def test_encode_simple_string(self):
+        echo_text = "hello"
+        self.assertEqual(RESPResponseBuilder().encode_simple_string(echo_text), b"+hello\r\n")
+
+    def test_encode_bulk_string(self):
+        messages = ["hello", "world"]
+        self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
+                         b"*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n")
+
+    def test_encode_bulk_string_single_arg(self):
+        messages = ["hello"]
+        self.assertEqual(RESPResponseBuilder().encode_arrays(messages),
+                         b"*1\r\n$5\r\nhello\r\n")
 
 if __name__ == "__main__":
     print('hi')

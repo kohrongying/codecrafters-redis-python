@@ -31,6 +31,22 @@ class ByteStringParser:
             return []
 
 
+class RESPResponseBuilder:
+    @staticmethod
+    def encode_simple_string(message: str) -> bytes:
+        return_message = f"+{message}\r\n"
+        return return_message.encode()
+
+    @staticmethod
+    def encode_arrays(messages: List[str]) -> bytes:
+        return_message = ""
+        length_identifier = f"*{len(messages)}"
+        return_message += length_identifier + '\r\n'
+        for message in messages:
+            return_message += f"${len(message)}\r\n{message}\r\n"
+        return return_message.encode()
+
+
 def handle_connection(conn):
     while True:
         try:
@@ -39,8 +55,9 @@ def handle_connection(conn):
             command_text = parser.get_command()
 
             if command_text.upper() == "ECHO":
-                return_message = f"+{command_string_list[4]}\r\n"
-                conn.send(return_message.encode())
+                args: List[Optional[str]] = parser.get_args()
+                return_message = RESPResponseBuilder().encode_arrays(args)
+                conn.send(return_message)
             else:
                 conn.send(b"+PONG\r\n")  # hardcode pong with RESP
         except ConnectionError:
