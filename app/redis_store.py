@@ -7,6 +7,8 @@ class RedisStore:
         self.expiry = {}
 
     def get(self, key: str):
+        if self.expiry.get(key, None) is not None and self._is_expired(key):
+            return None
         return self.store.get(key, None)
 
     def set(self, key: str, value: any, *args) -> str:
@@ -14,7 +16,9 @@ class RedisStore:
         self.store[key] = value
         self.expiry[key] = None
         if len(args) > 0:
-            print(args)
             if args[0] == "PX":
-                self.expiry[key] = int(time.time() * 1000 + int(args[1]))
+                self.expiry[key] = int(time.time() + int(args[1]) * 0.001)
         return return_message
+
+    def _is_expired(self, key) -> bool:
+        return self.expiry.get(key) < time.time()
