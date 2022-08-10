@@ -35,8 +35,9 @@ def handle_set(args, conn):
     key = args[0]
     value = args[1]
     if len(args) > 2 and args[2].upper() == "PX":
-        expiry = int(args[3])
-        response = redis_store.set_with_expiry(key, value, expiry)
+        expiry_in_millis = int(args[3])
+        expiry_in_secs = expiry_in_millis * 0.001
+        response = redis_store.set_with_expiry(key, value, expiry_in_secs)
     else:
         response = redis_store.set(key, value)
 
@@ -48,10 +49,7 @@ def handle_get(args, conn):
     key = args[0]
     stored_value: Optional[str] = redis_store.get(key)
     print('stored value is', stored_value)
-    if type(stored_value) == str or stored_value is None:
-        message = RESPResponseBuilder().encode_bulk_strings(stored_value)
-    else:
-        message = RESPResponseBuilder().encode_error("value is not string")
+    message = RESPResponseBuilder().encode_bulk_strings(stored_value)
     conn.send(message)
 
 
